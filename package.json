@@ -1,7 +1,7 @@
 {
-	"name": "typescript-npm-module",
+	"name": "etherscan.js",
 	"version": "1.0.0",
-	"description": "A generic typescript npm package",
+	"description": "Node.js library for Etherscan.io",
 	"main": "./lib/index.js",
 	"types": "lib/index.d.ts",
 	"scripts": {
@@ -15,14 +15,14 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/jiricekcz/typescript-npm-module.git"
+		"url": "git+https://github.com/jiricekcz/etherscan.git"
 	},
 	"author": "jiricekcz",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/jiricekcz/typescript-npm-module/issues"
+		"url": "https://github.com/jiricekcz/etherscan/issues"
 	},
-	"homepage": "https://github.com/jiricekcz/typescript-npm-module#readme",
+	"homepage": "https://github.com/jiricekcz/etherscan#readme",
 	"devDependencies": {
 		"@types/node": "^17.0.10",
 		"@typescript-eslint/eslint-plugin": "^5.10.0",
