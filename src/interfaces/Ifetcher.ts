@@ -12,5 +12,11 @@ export interface Param {
     name: string;
     value: string | string[];
 }
+export interface EtherscanResponse {
+    status: string;
+    message: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    result: any;
+}
 export type Module = "account" | "contract" | "transaction" | "proxy" | "stats" | "gastracker";
 export type Tag = "earliest" | "latest" | "pending";

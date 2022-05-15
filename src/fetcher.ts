@@ -2,7 +2,7 @@
 import axios from "axios";
 
 import { IAPI } from "./interfaces/Iapi";
-import { IFetcher, Module, Param, Tag } from "./interfaces/Ifetcher";
+import { EtherscanResponse, IFetcher, Module, Param, Tag } from "./interfaces/Ifetcher";
 import { AccountBalanceResponse, AccountsBalanceResponse } from "./types/endpoints";
 
 export class Fetcher implements IFetcher {
@@ -13,26 +13,16 @@ export class Fetcher implements IFetcher {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async fetchEtherscanMethod(module: Module, action: string, params: Param[]): Promise<any> {
-        try {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-            return await this.fetchEtherscanMethodOnce(module, action, params);
-        } catch (e) {
-            if (axios.isAxiosError(e)) {
-                if (e?.response?.status === 429) {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                    return await this.fetchEtherscanMethod(module, action, params);
-                }
-            } else {
-                throw e;
-            }
-        }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return await this.fetchEtherscanMethodOnce(module, action, params);
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async fetchEtherscanMethodOnce(module: Module, action: string, params: Param[]): Promise<any> {
+    async fetchEtherscanMethodOnce(module: Module, action: string, params: Param[]): Promise<EtherscanResponse> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const requestParams: any = {
             module,
             action,
+            apiKey: this.api.key,
         };
         for (const param of params) {
             if (Array.isArray(param.value)) {
@@ -48,7 +38,9 @@ export class Fetcher implements IFetcher {
             params: requestParams,
         });
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return response.data;
+        const data = response.data as EtherscanResponse;
+        if (data.message !== "OK") throw new Error("Etherscan error: " + data.message);
+        return data;
     }
 
     async getAccountBalance(address: string, tag: Tag = "latest"): Promise<BigInt> {
@@ -67,10 +59,10 @@ export class Fetcher implements IFetcher {
             { name: "address", value: addresses },
             { name: "tag", value: tag },
         ])) as AccountsBalanceResponse;
-
         return response.result.map((result: { account: string; balance: string }) => ({
             account: result.account,
             balance: BigInt(result.balance),
         }));
     }
 }
+
