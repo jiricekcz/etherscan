@@ -1,6 +1,6 @@
 {
 	"name": "etherscan.js",
-	"version": "0.0.2",
+	"version": "0.1.0",
 	"description": "Node.js library for Etherscan.io",
 	"main": "./lib/index.js",
 	"types": "lib/index.d.ts",
