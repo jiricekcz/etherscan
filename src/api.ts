@@ -2,9 +2,11 @@
 import { ApiConstructorConfig, KeyConfig, KeyPlan, defaultKeyLimits as defaultLimits, Network, networkUrls} from "./types/configs";
 import { IAPI } from "./interfaces/Iapi";
 import { isKeyConfig } from "./utils";
+import { Fetcher } from "./fetcher";
 export class API implements IAPI {
     private readonly keyManager: APIKeyManager;
     private readonly network: Network;
+    public readonly fetcher: Fetcher;
     constructor(config: ApiConstructorConfig) {
         if (isKeyConfig(config.key)) {
             this.keyManager = new APIKeyManager([config.key]);
@@ -14,7 +16,7 @@ export class API implements IAPI {
             throw new Error("Invalid key config");
         }
 
-
+        this.fetcher = new Fetcher(this);
         this.network = config.network;
     }
 

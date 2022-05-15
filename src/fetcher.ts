@@ -2,7 +2,8 @@
 import axios from "axios";
 
 import { IAPI } from "./interfaces/Iapi";
-import { IFetcher, Module, Param } from "./interfaces/Ifetcher";
+import { IFetcher, Module, Param, Tag } from "./interfaces/Ifetcher";
+import { AccountBalanceResponse, AccountsBalanceResponse } from "./types/endpoints";
 
 export class Fetcher implements IFetcher {
     private readonly api: IAPI;
@@ -29,7 +30,10 @@ export class Fetcher implements IFetcher {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async fetchEtherscanMethodOnce(module: Module, action: string, params: Param[]): Promise<any> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const requestParams: any = {};
+        const requestParams: any = {
+            module,
+            action,
+        };
         for (const param of params) {
             if (Array.isArray(param.value)) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -43,5 +47,30 @@ export class Fetcher implements IFetcher {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             params: requestParams,
         });
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return response.data;
+    }
+
+    async getAccountBalance(address: string, tag: Tag = "latest"): Promise<BigInt> {
+        const response: AccountBalanceResponse = (await this.fetchEtherscanMethod("account", "balance", [
+            { name: "address", value: address },
+            { name: "tag", value: tag },
+        ])) as AccountBalanceResponse;
+        return BigInt(response.result);
+    }
+
+    async getAccountsBalance(
+        addresses: string[],
+        tag: Tag = "latest"
+    ): Promise<{ account: string; balance: BigInt }[]> {
+        const response: AccountsBalanceResponse = (await this.fetchEtherscanMethod("account", "balancemulti", [
+            { name: "address", value: addresses },
+            { name: "tag", value: tag },
+        ])) as AccountsBalanceResponse;
+
+        return response.result.map((result: { account: string; balance: string }) => ({
+            account: result.account,
+            balance: BigInt(result.balance),
+        }));
     }
 }
