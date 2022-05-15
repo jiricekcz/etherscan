@@ -1,4 +1,3 @@
-
 export interface ApiConstructorConfig {
     key: KeyConfig | Array<KeyConfig>;
     network: Network;
@@ -42,12 +41,12 @@ export const defaultKeyLimits: { [key in KeyPlan]: number } = {
     standard: 10,
     advanced: 20,
     professional: 30,
-    generic: 5
-}
+    generic: 5,
+};
 export const networkUrls: { [key in Network]: string } = {
     mainnet: "https://api.etherscan.io/api",
     goerli: "https://api-goerli.etherscan.io/api",
     ropsten: "https://api-ropsten.etherscan.io/api",
     rinkeby: "https://api-rinkeby.etherscan.io/api",
-    kovan: "https://api-kovan.etherscan.io/api"
-}
+    kovan: "https://api-kovan.etherscan.io/api",
+};

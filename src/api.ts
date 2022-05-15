@@ -1,5 +1,12 @@
 /* eslint-disable import/no-unresolved */
-import { ApiConstructorConfig, KeyConfig, KeyPlan, defaultKeyLimits as defaultLimits, Network, networkUrls} from "./types/configs";
+import {
+    ApiConstructorConfig,
+    KeyConfig,
+    KeyPlan,
+    defaultKeyLimits as defaultLimits,
+    Network,
+    networkUrls,
+} from "./types/configs";
 import { IAPI } from "./interfaces/Iapi";
 import { isKeyConfig } from "./utils";
 import { Fetcher } from "./fetcher";
@@ -33,7 +40,7 @@ export class APIKeyManager {
     readonly keys: Array<KeyObject> = [];
     private keyIndex = 0;
     constructor(keys: Array<KeyConfig>) {
-        keys.forEach(key => {
+        keys.forEach((key) => {
             this.keys.push(new KeyObject(key));
         });
     }
@@ -41,7 +48,7 @@ export class APIKeyManager {
         this.keyIndex++;
         if (this.keyIndex == this.keys.length) this.keyIndex = 0;
         const k = this.keys[this.keyIndex];
-        if (!k) throw new Error("No keys available"); 
+        if (!k) throw new Error("No keys available");
         return k;
     }
     get key(): string {

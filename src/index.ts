@@ -31,6 +31,4 @@ async function main(): Promise<void> {
 if (require.main === module) {
     void main();
 }
-export {
-    API,
-}
+export { API };
