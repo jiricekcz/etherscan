@@ -2,8 +2,21 @@
 import axios from "axios";
 
 import { IAPI } from "./interfaces/Iapi";
-import { EtherscanResponse, IFetcher, Module, Param, Tag } from "./interfaces/Ifetcher";
-import { AccountBalanceResponse, AccountsBalanceResponse } from "./types/endpoints";
+import {
+    EtherscanResponse,
+    IFetcher,
+    Module,
+    Param,
+    SortOption,
+    Tag,
+    Transaction as FetcherTransaction,
+} from "./interfaces/Ifetcher";
+import {
+    AccountBalanceResponse,
+    AccountsBalanceResponse,
+    NormalTransactionsRespose,
+    Transaction,
+} from "./types/endpoints";
 
 export class Fetcher implements IFetcher {
     private readonly api: IAPI;
@@ -64,4 +77,38 @@ export class Fetcher implements IFetcher {
             balance: BigInt(result.balance),
         }));
     }
+
+    async getAccountNormalTransactions(
+        address: string,
+        startBlock = 0,
+        endblock = 9999999,
+        page?: number | undefined,
+        offset?: number | undefined,
+        sort: SortOption = "desc"
+    ): Promise<Array<FetcherTransaction>> {
+        const response: NormalTransactionsRespose = (await this.fetchEtherscanMethod("account", "txlist", [
+            { name: "address", value: address },
+            { name: "startblock", value: startBlock.toString() },
+            { name: "endblock", value: endblock.toString() },
+            { name: "page", value: page?.toString() },
+            { name: "offset", value: offset?.toString() },
+            { name: "sort", value: sort },
+        ])) as NormalTransactionsRespose;
+        return response.result.map(parseTransaction);
+    }
+}
+export function parseTransaction(result: Transaction): FetcherTransaction {
+    return {
+        ...result,
+        blockNumber: Number(result.blockNumber),
+        timeStamp: new Date(Number(result.timeStamp) * 1000),
+        transactionIndex: Number(result.transactionIndex),
+        value: BigInt(result.value),
+        gas: Number(result.gas),
+        gasPrice: BigInt(result.gasPrice),
+        cumulativeGasUsed: Number(result.cumulativeGasUsed),
+        gasUsed: Number(result.gasUsed),
+        confirmations: Number(result.confirmations),
+        isError: result.isError === "1",
+    };
 }
