@@ -1,9 +1,10 @@
 /* eslint-disable import/no-unresolved */
-import { ApiConstructorConfig, KeyConfig, KeyPlan, defaultKeyLimits as defaultLimits} from "./configs";
-import { IAPI } from "./Iapi";
+import { ApiConstructorConfig, KeyConfig, KeyPlan, defaultKeyLimits as defaultLimits, Network, networkUrls} from "./types/configs";
+import { IAPI } from "./interfaces/Iapi";
 import { isKeyConfig } from "./utils";
 export class API implements IAPI {
     private readonly keyManager: APIKeyManager;
+    private readonly network: Network;
     constructor(config: ApiConstructorConfig) {
         if (isKeyConfig(config.key)) {
             this.keyManager = new APIKeyManager([config.key]);
@@ -12,10 +13,17 @@ export class API implements IAPI {
         } else {
             throw new Error("Invalid key config");
         }
+
+
+        this.network = config.network;
     }
 
     get key() {
         return this.keyManager.key;
+    }
+
+    get url() {
+        return networkUrls[this.network];
     }
 }
 
