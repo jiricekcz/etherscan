@@ -148,6 +148,24 @@ export interface IFetcher {
         page?: number,
         offset?: number
     ): Promise<Array<BlockMineResult>>;
+
+    /**
+     * Returns the Contract Application Binary Interface ( ABI ) of a verified smart contract.
+     * @param address Address of the contract
+     * @returns String abi of the contract
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/contracts#get-contract-abi-for-verified-contract-source-codes)
+     */
+    getContractABI(address: string): Promise<string>;
+
+    /**
+     * Returns the Solidity source code of a verified smart contract.
+     * @param address Address of the contract
+     * @returns String source code of the contract
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/contracts#get-contract-source-code-for-verified-contract-source-codes)
+     */
+    getContractSource(address: string): Promise<ContractSource>;
+
+    //TODO: source code verification (not main focus of this library, so development postponed)
 }
 
 export interface Param {
@@ -243,6 +261,21 @@ export interface ERC721TransferEvent {
     cumulativeGasUsed: number;
     input: string;
     confirmations: number;
+}
+export interface ContractSource {
+    sourceCode: string;
+    ABI: string;
+    contractName: string;
+    compilerVersion: string;
+    optimizationsUsed: number;
+    runs: number;
+    constructorArguments: string;
+    EVMVersion: string;
+    library: string;
+    licenseType: string;
+    proxy: number;
+    implementation: string;
+    swarmSource: string;
 }
 export type Module = "account" | "contract" | "transaction" | "proxy" | "stats" | "gastracker";
 export type Tag = "earliest" | "latest" | "pending";
