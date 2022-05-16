@@ -1,4 +1,8 @@
 /* eslint-disable import/no-unresolved */
+/**
+ * Fetcher is a class that provides basic JavaScript interface to the API.  
+ * Fetcher methods map 1 to 1 to API methods.  
+ */
 export interface IFetcher {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fetchEtherscanMethod(module: Module, action: string, params: Array<Param>): Promise<any>;
