@@ -1,10 +1,21 @@
 {
 	"name": "etherscan.js",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "Node.js library for Etherscan.io",
 	"main": "./lib/index.js",
 	"types": "lib/index.d.ts",
-	"keywords": ["eth", "ethereum", "etherscan", "api", "blockchain", "javascript", "typescript", "https", "etherscan.io"],
+	"keywords": [
+		"eth",
+		"ethereum",
+		"etherscan",
+		"api",
+		"blockchain",
+		"javascript",
+		"typescript",
+		"https",
+		"etherscan.io",
+		"smart contract"
+	],
 	"scripts": {
 		"test": "npx jest",
 		"build": "tsc",
