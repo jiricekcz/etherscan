@@ -13,6 +13,11 @@ export interface NormalTransactionsRespose {
     message: string;
     result: Transaction[];
 }
+export interface InternalTransactionsRespose {
+    status: string;
+    message: string;
+    result: InternalTransaction[];
+}
 export interface Transaction {
     blockNumber: string;
     timeStamp: string;
@@ -32,4 +37,20 @@ export interface Transaction {
     cumulativeGasUsed: string;
     gasUsed: string;
     confirmations: string;
+}
+export interface InternalTransaction {
+    blockNumber: string;
+    timeStamp: string;
+    hash: string;
+    from: string;
+    to: string;
+    value: string;
+    contractAddress: string;
+    input: string;
+    type: string;
+    gas: string;
+    gasUsed: string;
+    traceId: string;
+    isError: string;
+    errCode: string;
 }

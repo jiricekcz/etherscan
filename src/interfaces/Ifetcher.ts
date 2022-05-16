@@ -1,5 +1,4 @@
 /* eslint-disable import/no-unresolved */
-
 export interface IFetcher {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fetchEtherscanMethod(module: Module, action: string, params: Array<Param>): Promise<any>;
@@ -15,6 +14,14 @@ export interface IFetcher {
         offset?: number,
         sort?: SortOption
     ): Promise<Array<Transaction>>;
+    getAccountInternalTransactions(
+        address: string,
+        startBlock?: number,
+        endblock?: number,
+        page?: number,
+        offset?: number,
+        sort?: SortOption
+    ): Promise<Array<InternalTransaction>>;
 }
 
 export interface Param {
@@ -46,6 +53,22 @@ export interface Transaction {
     cumulativeGasUsed: number;
     gasUsed: number;
     confirmations: number;
+}
+export interface InternalTransaction {
+    blockNumber: number;
+    timeStamp: Date;
+    hash: string;
+    from: string;
+    to: string;
+    value: BigInt;
+    contractAddress: string;
+    input: string;
+    type: string;
+    gas: number;
+    gasUsed: number;
+    traceId: string;
+    isError: boolean;
+    errCode: string;
 }
 export type Module = "account" | "contract" | "transaction" | "proxy" | "stats" | "gastracker";
 export type Tag = "earliest" | "latest" | "pending";

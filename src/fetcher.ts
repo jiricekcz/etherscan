@@ -10,10 +10,13 @@ import {
     SortOption,
     Tag,
     Transaction as FetcherTransaction,
+    InternalTransaction as FetcherInternalTransaction,
 } from "./interfaces/Ifetcher";
 import {
     AccountBalanceResponse,
     AccountsBalanceResponse,
+    InternalTransaction,
+    InternalTransactionsRespose,
     NormalTransactionsRespose,
     Transaction,
 } from "./types/endpoints";
@@ -55,7 +58,12 @@ export class Fetcher implements IFetcher {
         if (data.message !== "OK") throw new Error("Etherscan error: " + data.message);
         return data;
     }
-
+    /**
+     * Retrieves the balance of an account.
+     * @param address Address of the account
+     * @returns Balance of the account as a BigInt
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/accounts#get-ether-balance-for-a-single-address)
+     */
     async getAccountBalance(address: string, tag: Tag = "latest"): Promise<BigInt> {
         const response: AccountBalanceResponse = (await this.fetchEtherscanMethod("account", "balance", [
             { name: "address", value: address },
@@ -64,6 +72,12 @@ export class Fetcher implements IFetcher {
         return BigInt(response.result);
     }
 
+    /**
+     * Retrievs balances of multiple accounts in a single API call.
+     * @param addresses Array of addresses
+     * @returns Adresses and their balances
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/accounts#get-ether-balance-for-multiple-addresses-in-a-single-call)
+     */
     async getAccountsBalance(
         addresses: string[],
         tag: Tag = "latest"
@@ -78,10 +92,21 @@ export class Fetcher implements IFetcher {
         }));
     }
 
+    /**
+     * Retrieves all "normal" transactions of an account. Limit is 10 000 transactions.
+     * @param address Address of the account
+     * @param startBlock Block at which to start the search. Defaults to 0
+     * @param endblock Block at which to end the search. Defaults to 1e7
+     * @param page If you want to retrieve a specific page of transactions, set this to the page number.
+     * @param offset Page size
+     * @param sort Sorting preference
+     * @returns Array of transactions
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/accounts#get-a-list-of-normal-transactions-by-address)
+     */
     async getAccountNormalTransactions(
         address: string,
         startBlock = 0,
-        endblock = 9999999,
+        endblock = 1e7,
         page?: number | undefined,
         offset?: number | undefined,
         sort: SortOption = "desc"
@@ -94,10 +119,41 @@ export class Fetcher implements IFetcher {
             { name: "offset", value: offset?.toString() },
             { name: "sort", value: sort },
         ])) as NormalTransactionsRespose;
-        return response.result.map(parseTransaction);
+        return response.result.map(parseNormalTransaction);
+    }
+
+
+    /**
+     * Retrieves all "internal" transactions of an account. Limit is 10 000 transactions.
+     * @param address Address of the account
+     * @param startBlock Block at which to start the search. Defaults to 0
+     * @param endblock Block at which to end the search. Defaults to 1e7
+     * @param page If you want to retrieve a specific page of transactions, set this to the page number.
+     * @param offset Page size
+     * @param sort Sorting preference
+     * @returns Array of transactions
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/accounts#get-a-list-of-internal-transactions-by-address)
+     */
+    async getAccountInternalTransactions(
+        address: string,
+        startBlock = 0,
+        endblock = 1e7,
+        page?: number | undefined,
+        offset?: number | undefined,
+        sort: SortOption = "desc"
+    ): Promise<Array<FetcherInternalTransaction>>{
+        const response: InternalTransactionsRespose = (await this.fetchEtherscanMethod("account", "txlistinternal", [
+            { name: "address", value: address },
+            { name: "startblock", value: startBlock.toString() },
+            { name: "endblock", value: endblock.toString() },
+            { name: "page", value: page?.toString() },
+            { name: "offset", value: offset?.toString() },
+            { name: "sort", value: sort },
+        ])) as InternalTransactionsRespose;
+        return response.result.map(parseInternalTransaction);
     }
 }
-export function parseTransaction(result: Transaction): FetcherTransaction {
+export function parseNormalTransaction(result: Transaction): FetcherTransaction {
     return {
         ...result,
         blockNumber: Number(result.blockNumber),
@@ -109,6 +165,17 @@ export function parseTransaction(result: Transaction): FetcherTransaction {
         cumulativeGasUsed: Number(result.cumulativeGasUsed),
         gasUsed: Number(result.gasUsed),
         confirmations: Number(result.confirmations),
+        isError: result.isError === "1",
+    };
+}
+export function parseInternalTransaction(result: InternalTransaction): FetcherInternalTransaction {
+    return {
+        ...result,
+        blockNumber: Number(result.blockNumber),
+        timeStamp: new Date(Number(result.timeStamp) * 1000),
+        value: BigInt(result.value),
+        gas: Number(result.gas),
+        gasUsed: Number(result.gasUsed),
         isError: result.isError === "1",
     };
 }
