@@ -267,7 +267,7 @@ export interface ContractSource {
     ABI: string;
     contractName: string;
     compilerVersion: string;
-    optimizationsUsed: number;
+    optimizationsUsed: boolean;
     runs: number;
     constructorArguments: string;
     EVMVersion: string;
