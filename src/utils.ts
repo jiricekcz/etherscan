@@ -34,7 +34,8 @@ export class RequestTimeTracker {
     public readonly interval: number;
     public readonly maxRequests: number;
     protected readonly safetyInterval: number;
-    constructor(maxRequests: number, interval: number, safetyInterval = 200) {
+    protected ongoingQueueUpdate = false;
+    constructor(maxRequests: number, interval: number, safetyInterval = 20) {
         this.requestTimes = new RotatingArray(maxRequests, () => new Date(0));
         this.interval = interval;
         this.maxRequests = maxRequests;
@@ -53,23 +54,33 @@ export class RequestTimeTracker {
         const timeSinceLastRequest = new Date().getTime() - lastRequest.getTime();
         return Math.max(this.interval - timeSinceLastRequest + this.safetyInterval, 0);
     }
-    protected enqueueQueueRefresh(time: number): Promise<void> {
-        return new Promise<void>(resolve => {
-            setTimeout(() => {
-                if (this.queue.length == 0) return resolve();
-                const r = this.queue.shift() as () => void;
-                r();
-                this.callRequest();
-                if (this.queue.length > 0) void this.enqueueQueueRefresh(this.timeToNextRequest());
-                resolve();
-            }, time);
-        });    
+    protected newUpdateQueue(): void {
+        if (this.ongoingQueueUpdate) return;
+        void this.updateQueue();
+    }
+    protected async updateQueue(): Promise<void> {
+        this.ongoingQueueUpdate = true;
+        while (this.queue.length > 0) {
+            if (!this.canRequest()) {
+                console.log(`Waiting for ${this.timeToNextRequest()}ms`);
+                await delay(this.timeToNextRequest());
+            }
+            const resolve = this.queue.shift() as () => void;
+            resolve();
+            this.callRequest();
+        }
+        this.ongoingQueueUpdate = false;
     }
     waitUntilRequestPossible(): Promise<void> {
         return new Promise<void>((resolve) => {
-            if (this.canRequest()) return resolve();
             this.queue.push(resolve);
-            void this.enqueueQueueRefresh(this.timeToNextRequest());
+            console.log(`Added request to queue. Queue length: ${this.queue.length}`);
+            this.newUpdateQueue();
         });
     }
+}
+export function delay(ms: number): Promise<void> {
+    return new Promise<void>((resolve) => {
+        setTimeout(resolve, ms);
+    });
 }
