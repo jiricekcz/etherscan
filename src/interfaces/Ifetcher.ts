@@ -3,9 +3,33 @@ export interface IFetcher {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fetchEtherscanMethod(module: Module, action: string, params: Array<Param>): Promise<any>;
 
+    /**
+     * Retrieves the balance of an account.
+     * @param address Address of the account
+     * @returns Balance of the account as a BigInt
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/accounts#get-ether-balance-for-a-single-address)
+     */
     getAccountBalance(address: string, tag?: Tag): Promise<BigInt>;
+
+    /**
+     * Retrievs balances of multiple accounts in a single API call.
+     * @param addresses Array of addresses
+     * @returns Adresses and their balances
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/accounts#get-ether-balance-for-multiple-addresses-in-a-single-call)
+     */
     getAccountsBalance(addresses: Array<string>, tag?: Tag): Promise<Array<{ account: string; balance: BigInt }>>;
 
+    /**
+     * Retrieves all "normal" transactions of an account. Limit is 10 000 transactions.
+     * @param address Address of the account
+     * @param startBlock Block at which to start the search. Defaults to 0
+     * @param endblock Block at which to end the search. Defaults to 1e7
+     * @param page If you want to retrieve a specific page of transactions, set this to the page number.
+     * @param offset Page size
+     * @param sort Sorting preference
+     * @returns Array of transactions
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/accounts#get-a-list-of-normal-transactions-by-address)
+     */
     getAccountNormalTransactions(
         address: string,
         startBlock?: number,
@@ -14,6 +38,18 @@ export interface IFetcher {
         offset?: number,
         sort?: SortOption
     ): Promise<Array<Transaction>>;
+    
+    /**
+     * Retrieves all "internal" transactions of an account. Limit is 10 000 transactions.
+     * @param address Address of the account
+     * @param startBlock Block at which to start the search. Defaults to 0
+     * @param endblock Block at which to end the search. Defaults to 1e7
+     * @param page If you want to retrieve a specific page of transactions, set this to the page number.
+     * @param offset Page size
+     * @param sort Sorting preference
+     * @returns Array of transactions
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/accounts#get-a-list-of-internal-transactions-by-address)
+     */
     getAccountInternalTransactions(
         address: string,
         startBlock?: number,

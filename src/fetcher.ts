@@ -58,12 +58,7 @@ export class Fetcher implements IFetcher {
         if (data.message !== "OK") throw new Error("Etherscan error: " + data.message);
         return data;
     }
-    /**
-     * Retrieves the balance of an account.
-     * @param address Address of the account
-     * @returns Balance of the account as a BigInt
-     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/accounts#get-ether-balance-for-a-single-address)
-     */
+    
     async getAccountBalance(address: string, tag: Tag = "latest"): Promise<BigInt> {
         const response: AccountBalanceResponse = (await this.fetchEtherscanMethod("account", "balance", [
             { name: "address", value: address },
@@ -72,12 +67,7 @@ export class Fetcher implements IFetcher {
         return BigInt(response.result);
     }
 
-    /**
-     * Retrievs balances of multiple accounts in a single API call.
-     * @param addresses Array of addresses
-     * @returns Adresses and their balances
-     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/accounts#get-ether-balance-for-multiple-addresses-in-a-single-call)
-     */
+    
     async getAccountsBalance(
         addresses: string[],
         tag: Tag = "latest"
@@ -92,17 +82,7 @@ export class Fetcher implements IFetcher {
         }));
     }
 
-    /**
-     * Retrieves all "normal" transactions of an account. Limit is 10 000 transactions.
-     * @param address Address of the account
-     * @param startBlock Block at which to start the search. Defaults to 0
-     * @param endblock Block at which to end the search. Defaults to 1e7
-     * @param page If you want to retrieve a specific page of transactions, set this to the page number.
-     * @param offset Page size
-     * @param sort Sorting preference
-     * @returns Array of transactions
-     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/accounts#get-a-list-of-normal-transactions-by-address)
-     */
+    
     async getAccountNormalTransactions(
         address: string,
         startBlock = 0,
@@ -123,17 +103,7 @@ export class Fetcher implements IFetcher {
     }
 
 
-    /**
-     * Retrieves all "internal" transactions of an account. Limit is 10 000 transactions.
-     * @param address Address of the account
-     * @param startBlock Block at which to start the search. Defaults to 0
-     * @param endblock Block at which to end the search. Defaults to 1e7
-     * @param page If you want to retrieve a specific page of transactions, set this to the page number.
-     * @param offset Page size
-     * @param sort Sorting preference
-     * @returns Array of transactions
-     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/accounts#get-a-list-of-internal-transactions-by-address)
-     */
+    
     async getAccountInternalTransactions(
         address: string,
         startBlock = 0,
