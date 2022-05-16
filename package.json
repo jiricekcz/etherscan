@@ -4,6 +4,7 @@
 	"description": "Node.js library for Etherscan.io",
 	"main": "./lib/index.js",
 	"types": "lib/index.d.ts",
+	"keywords": ["eth", "ethereum", "etherscan", "api", "blockchain", "javascript", "typescript", "https", "etherscan.io"],
 	"scripts": {
 		"test": "npx jest",
 		"build": "tsc",
