@@ -8,7 +8,7 @@ async function main(): Promise<void> {
                 key: "IS2FE1QQD3TN5KBQ14B5FVZ3J81AGXF46Q",
                 plan: "free",
                 limit: 5,
-            }
+            },
         ],
         network: "mainnet",
     });
@@ -28,11 +28,10 @@ async function main(): Promise<void> {
         const a = async () => {
             await tracker.waitUntilRequestPossible();
             console.log(i);
-        }
+        };
         void a();
     }
     await tracker.waitUntilRequestPossible();
-
 }
 if (require.main === module) {
     void main();
