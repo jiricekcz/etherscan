@@ -37,6 +37,16 @@ export interface BlocksMinedResponse {
         blockReward: string;
     }[];
 }
+export interface ABIResponse {
+    status: string;
+    message: string;
+    result: string;
+}
+export interface ContractSourceResponse {
+    status: string;
+    message: string;
+    result: ContractSource;
+}
 export interface Transaction {
     blockNumber: string;
     timeStamp: string;
@@ -114,4 +124,19 @@ export interface ERC721TransferEvent {
     cumulativeGasUsed: string;
     confirmations: string;
     input: string;
+}
+export interface ContractSource {
+    SourceCode: string;
+    ABI: string;
+    ContractName: string;
+    CompilerVersion: string;
+    OptimizationUsed: string;
+    Runs: string;
+    ConstructorArguments: string;
+    EVMVersion: string;
+    Library: string;
+    LicenseType: string;
+    Proxy: string;
+    Implementation: string;
+    SwarmSource: string;
 }

@@ -15,6 +15,7 @@ import {
     ERC721TransferEvent as FetcherERC721TransferEvent,
     BlockMineResult,
     BlockType,
+    ContractSource as FetcherContractSource,
 } from "./interfaces/Ifetcher";
 import {
     AccountBalanceResponse,
@@ -28,6 +29,9 @@ import {
     ERC721TransferEvent,
     ERC721TransferEventsResponse,
     BlocksMinedResponse,
+    ContractSource,
+    ABIResponse,
+    ContractSourceResponse,
 } from "./types/endpoints";
 
 export class Fetcher implements IFetcher {
@@ -213,6 +217,20 @@ export class Fetcher implements IFetcher {
             };
         });
     }
+
+    async getContractABI(address: string): Promise<string> {
+        const response: ABIResponse = (await this.fetchEtherscanMethod("contract", "getabi", [
+            { name: "address", value: address },
+        ])) as ABIResponse;
+        return response.result;
+    }
+
+    async getContractSource(address: string): Promise<FetcherContractSource> {
+        const response: ContractSourceResponse = (await this.fetchEtherscanMethod("contract", "getsourcecode", [
+            { name: "address", value: address },
+        ])) as ContractSourceResponse;
+        return parseContractSource(response.result);
+    }
 }
 export function parseNormalTransaction(result: Transaction): FetcherTransaction {
     return {
@@ -269,5 +287,22 @@ export function parseERC721Transfer(result: ERC721TransferEvent): FetcherERC721T
         cumulativeGasUsed: Number(result.cumulativeGasUsed),
         confirmations: Number(result.confirmations),
         tokenID: Number(result.tokenID),
+    };
+}
+export function parseContractSource(result: ContractSource): FetcherContractSource {
+    return {
+        ABI: result.ABI,
+        sourceCode: result.SourceCode,
+        compilerVersion: result.CompilerVersion,
+        constructorArguments: result.ConstructorArguments,
+        contractName: result.ContractName,
+        EVMVersion: result.EVMVersion,
+        implementation: result.Implementation,
+        library: result.Library,
+        licenseType: result.LicenseType,
+        optimizationUsed: result.OptimizationUsed == "1",
+        proxy: Number(result.Proxy),
+        runs: Number(result.Runs),
+        swarmSource: result.SwarmSource,
     };
 }
