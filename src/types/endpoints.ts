@@ -18,6 +18,25 @@ export interface InternalTransactionsRespose {
     message: string;
     result: InternalTransaction[];
 }
+export interface ERC20TransferEventsResponse {
+    status: string;
+    message: string;
+    result: ERC20TransferEvent[];
+}
+export interface ERC721TransferEventsResponse {
+    status: string;
+    message: string;
+    result: ERC721TransferEvent[];
+}
+export interface BlocksMinedResponse {
+    status: string;
+    message: string;
+    result: {
+        blockNumber: string;
+        timeStamp: string;
+        blockReward: string;
+    }[];
+}
 export interface Transaction {
     blockNumber: string;
     timeStamp: string;
@@ -53,4 +72,46 @@ export interface InternalTransaction {
     traceId: string;
     isError: string;
     errCode: string;
+}
+export interface ERC20TransferEvent {
+    blockNumber: string;
+    timeStamp: string;
+    hash: string;
+    noonce: string;
+    blockHash: string;
+    from: string;
+    contractAddress: string;
+    to: string;
+    value: string;
+    tokenName: string;
+    tokenSymbol: string;
+    tokenDecimal: string;
+    transactionIndex: string;
+    gas: string;
+    gasPrice: string;
+    gasUsed: string;
+    cumulativeGasUsed: string;
+    confirmations: string;
+    input: string;
+}
+export interface ERC721TransferEvent {
+    blockNumber: string;
+    timeStamp: string;
+    hash: string;
+    noonce: string;
+    blockHash: string;
+    from: string;
+    contractAddress: string;
+    to: string;
+    tokenID: string;
+    tokenName: string;
+    tokenSymbol: string;
+    tokenDecimal: string;
+    transactionIndex: string;
+    gas: string;
+    gasPrice: string;
+    gasUsed: string;
+    cumulativeGasUsed: string;
+    confirmations: string;
+    input: string;
 }

@@ -11,14 +11,23 @@ import {
     Tag,
     Transaction as FetcherTransaction,
     InternalTransaction as FetcherInternalTransaction,
+    ERC20TransferEvent as FetcherERC20TransferEvent,
+    ERC721TransferEvent as FetcherERC721TransferEvent,
+    BlockMineResult,
+    BlockType,
 } from "./interfaces/Ifetcher";
 import {
     AccountBalanceResponse,
     AccountsBalanceResponse,
+    ERC20TransferEventsResponse,
     InternalTransaction,
     InternalTransactionsRespose,
     NormalTransactionsRespose,
     Transaction,
+    ERC20TransferEvent,
+    ERC721TransferEvent,
+    ERC721TransferEventsResponse,
+    BlocksMinedResponse,
 } from "./types/endpoints";
 
 export class Fetcher implements IFetcher {
@@ -58,7 +67,7 @@ export class Fetcher implements IFetcher {
         if (data.message !== "OK") throw new Error("Etherscan error: " + data.message);
         return data;
     }
-    
+
     async getAccountBalance(address: string, tag: Tag = "latest"): Promise<BigInt> {
         const response: AccountBalanceResponse = (await this.fetchEtherscanMethod("account", "balance", [
             { name: "address", value: address },
@@ -67,7 +76,6 @@ export class Fetcher implements IFetcher {
         return BigInt(response.result);
     }
 
-    
     async getAccountsBalance(
         addresses: string[],
         tag: Tag = "latest"
@@ -82,7 +90,6 @@ export class Fetcher implements IFetcher {
         }));
     }
 
-    
     async getAccountNormalTransactions(
         address: string,
         startBlock = 0,
@@ -102,8 +109,6 @@ export class Fetcher implements IFetcher {
         return response.result.map(parseNormalTransaction);
     }
 
-
-    
     async getAccountInternalTransactions(
         address: string,
         startBlock = 0,
@@ -111,7 +116,7 @@ export class Fetcher implements IFetcher {
         page?: number | undefined,
         offset?: number | undefined,
         sort: SortOption = "desc"
-    ): Promise<Array<FetcherInternalTransaction>>{
+    ): Promise<Array<FetcherInternalTransaction>> {
         const response: InternalTransactionsRespose = (await this.fetchEtherscanMethod("account", "txlistinternal", [
             { name: "address", value: address },
             { name: "startblock", value: startBlock.toString() },
@@ -121,6 +126,92 @@ export class Fetcher implements IFetcher {
             { name: "sort", value: sort },
         ])) as InternalTransactionsRespose;
         return response.result.map(parseInternalTransaction);
+    }
+    async getInternalTransactionsFromTransaction(txHash: string): Promise<FetcherInternalTransaction[]> {
+        const response: InternalTransactionsRespose = (await this.fetchEtherscanMethod("account", "txlistinternal", [
+            { name: "txhash", value: txHash },
+        ])) as InternalTransactionsRespose;
+        return response.result.map(parseInternalTransaction);
+    }
+
+    async getInternalTransactionsFromBlockRange(
+        startBlock = 0,
+        endblock = 1e7,
+        page?: number | undefined,
+        offset?: number | undefined,
+        sort: SortOption = "desc"
+    ): Promise<FetcherInternalTransaction[]> {
+        const response: InternalTransactionsRespose = (await this.fetchEtherscanMethod("account", "txlistinternal", [
+            { name: "startblock", value: startBlock.toString() },
+            { name: "endblock", value: endblock.toString() },
+            { name: "page", value: page?.toString() },
+            { name: "offset", value: offset?.toString() },
+            { name: "sort", value: sort },
+        ])) as InternalTransactionsRespose;
+        return response.result.map(parseInternalTransaction);
+    }
+
+    async getAccountERC20Transfers(
+        contractAddress: string,
+        address: string,
+        startBlock = 0,
+        endblock = 1e7,
+        page?: number | undefined,
+        offset?: number | undefined,
+        sort: SortOption = "desc"
+    ): Promise<FetcherERC20TransferEvent[]> {
+        const response: ERC20TransferEventsResponse = (await this.fetchEtherscanMethod("account", "tokentx", [
+            { name: "contractaddress", value: contractAddress },
+            { name: "address", value: address },
+            { name: "startblock", value: startBlock?.toString() },
+            { name: "endblock", value: endblock?.toString() },
+            { name: "page", value: page?.toString() },
+            { name: "offset", value: offset?.toString() },
+            { name: "sort", value: sort },
+        ])) as ERC20TransferEventsResponse;
+        return response.result.map(parseERC20Transfer);
+    }
+
+    async getAccountERC721Transfers(
+        contractAddress: string,
+        address: string,
+        startBlock?: number | undefined,
+        endblock?: number | undefined,
+        page?: number | undefined,
+        offset?: number | undefined,
+        sort?: SortOption | undefined
+    ): Promise<FetcherERC721TransferEvent[]> {
+        const response: ERC721TransferEventsResponse = (await this.fetchEtherscanMethod("account", "tokennfttx", [
+            { name: "contractaddress", value: contractAddress },
+            { name: "address", value: address },
+            { name: "startblock", value: startBlock?.toString() },
+            { name: "endblock", value: endblock?.toString() },
+            { name: "page", value: page?.toString() },
+            { name: "offset", value: offset?.toString() },
+            { name: "sort", value: sort },
+        ])) as ERC721TransferEventsResponse;
+        return response.result.map(parseERC721Transfer);
+    }
+
+    async getAccountMinedBlocks(
+        address: string,
+        blocktype: BlockType = "blocks",
+        page?: number | undefined,
+        offset?: number | undefined
+    ): Promise<BlockMineResult[]> {
+        const response: BlocksMinedResponse = (await this.fetchEtherscanMethod("account", "getminedblocks", [
+            { name: "address", value: address },
+            { name: "blocktype", value: blocktype },
+            { name: "page", value: page?.toString() },
+            { name: "offset", value: offset?.toString() },
+        ])) as BlocksMinedResponse;
+        return response.result.map((r) => {
+            return {
+                blockNumber: Number(r.blockNumber),
+                timeStamp: new Date(Number(r.timeStamp) * 1000),
+                blockReward: BigInt(r.blockReward),
+            };
+        });
     }
 }
 export function parseNormalTransaction(result: Transaction): FetcherTransaction {
@@ -147,5 +238,36 @@ export function parseInternalTransaction(result: InternalTransaction): FetcherIn
         gas: Number(result.gas),
         gasUsed: Number(result.gasUsed),
         isError: result.isError === "1",
+    };
+}
+export function parseERC20Transfer(result: ERC20TransferEvent): FetcherERC20TransferEvent {
+    return {
+        ...result,
+        timeStamp: new Date(Number(result.timeStamp) * 1000),
+        value: BigInt(result.value),
+        gas: Number(result.gas),
+        gasUsed: Number(result.gasUsed),
+        blockNumber: Number(result.blockNumber),
+        transactionIndex: Number(result.transactionIndex),
+        tokenDecimal: Number(result.tokenDecimal),
+        gasPrice: BigInt(result.gasPrice),
+        cumulativeGasUsed: Number(result.cumulativeGasUsed),
+        confirmations: Number(result.confirmations),
+    };
+}
+
+export function parseERC721Transfer(result: ERC721TransferEvent): FetcherERC721TransferEvent {
+    return {
+        ...result,
+        timeStamp: new Date(Number(result.timeStamp) * 1000),
+        gas: Number(result.gas),
+        gasUsed: Number(result.gasUsed),
+        blockNumber: Number(result.blockNumber),
+        transactionIndex: Number(result.transactionIndex),
+        tokenDecimal: Number(result.tokenDecimal),
+        gasPrice: BigInt(result.gasPrice),
+        cumulativeGasUsed: Number(result.cumulativeGasUsed),
+        confirmations: Number(result.confirmations),
+        tokenID: Number(result.tokenID),
     };
 }

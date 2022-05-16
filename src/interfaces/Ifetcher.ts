@@ -232,7 +232,7 @@ export interface ERC721TransferEvent {
     from: string;
     contractAddress: string;
     to: string;
-    tokenId: number;
+    tokenID: number;
     tokenName: string;
     tokenSymbol: string;
     tokenDecimal: number;
