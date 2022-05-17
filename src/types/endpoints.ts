@@ -210,3 +210,29 @@ export interface GasOracleResponse {
     message: string;
     result: GasOracle;
 }
+export interface TotalETHSupplyResponse {
+    status: string;
+    message: string;
+    result: string;
+}
+export interface ETH2Supply {
+    EthSupply: string;
+    Eth2Staking: string;
+    BurntFees: string;
+}
+export interface ETH2SupplyResponse {
+    status: string;
+    message: string;
+    result: ETH2Supply;
+}
+export interface ETHPrice {
+    ethbtc: string;
+    ethbtc_timestamp: string;
+    ethusd: string;
+    ethusd_timestamp: string;
+}
+export interface ETHPriceResponse {
+    status: string;
+    message: string;
+    result: ETHPrice;
+}

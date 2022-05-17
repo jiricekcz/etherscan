@@ -21,6 +21,8 @@ import {
     EstimatedBlockCountdownTime as FetcherEstimatedBlockCountdownTime,
     GasConfirmationTimeEstimation,
     GasOracle,
+    ETH2Supply,
+    ETHPrice,
 } from "./interfaces/Ifetcher";
 import {
     AccountBalanceResponse,
@@ -45,6 +47,9 @@ import {
     ERC20VolumeResponse,
     GasConfirmationTimeEstimationResponse,
     GasOracleResponse,
+    TotalETHSupplyResponse,
+    ETH2SupplyResponse,
+    ETHPriceResponse,
 } from "./types/endpoints";
 
 export class Fetcher implements IFetcher {
@@ -318,7 +323,30 @@ export class Fetcher implements IFetcher {
         )) as GasOracleResponse;
         return parseGasOracle(response.result);
     }
-    
+
+    async getTotalETHSupply(): Promise<BigInt> {
+        const response: TotalETHSupplyResponse = (await this.fetchEtherscanMethod(
+            "stats",
+            "ethsupply"
+        )) as TotalETHSupplyResponse;
+        return BigInt(response.result);
+    }
+
+    async getTotalETH2Supply(): Promise<ETH2Supply> {
+        const response: ETH2SupplyResponse = (await this.fetchEtherscanMethod(
+            "stats",
+            "ethsupply2"
+        )) as ETH2SupplyResponse;
+        return parseETH2Supply(response.result);
+    }
+
+    async getETHPrice(): Promise<ETHPrice> {
+        const response: ETHPriceResponse = (await this.fetchEtherscanMethod(
+            "stats",
+            "ethprice"
+        )) as ETHPriceResponse;
+        return parseETHPrice(response.result);
+    }
 }
 export function parseNormalTransaction(result: Transaction): FetcherTransaction {
     return {
@@ -444,4 +472,19 @@ export function parseGasOracle(result: GasOracleResponse["result"]): GasOracle {
         safeGasPrice: BigInt(result.SafeGasPrice),
         suggestBaseFee: Number(result.suggestBaseFee),
     };
+}
+export function parseETH2Supply(result: ETH2SupplyResponse["result"]): ETH2Supply {
+    return { 
+        burntFees: BigInt(result.BurntFees),
+        eth2Staking: BigInt(result.Eth2Staking),
+        ethSupply: BigInt(result.EthSupply),
+    }
+}
+export function parseETHPrice(result: ETHPriceResponse["result"]): ETHPrice {
+    return {
+        btcPerEth: Number(result.ethbtc),
+        btcTimestamp: new Date(Number(result.ethbtc_timestamp) * 1000),
+        usdPerEth: Number(result.ethusd),
+        usdTimestamp: new Date(Number(result.ethusd_timestamp) * 1000),
+    }
 }
