@@ -341,10 +341,7 @@ export class Fetcher implements IFetcher {
     }
 
     async getETHPrice(): Promise<ETHPrice> {
-        const response: ETHPriceResponse = (await this.fetchEtherscanMethod(
-            "stats",
-            "ethprice"
-        )) as ETHPriceResponse;
+        const response: ETHPriceResponse = (await this.fetchEtherscanMethod("stats", "ethprice")) as ETHPriceResponse;
         return parseETHPrice(response.result);
     }
 }
@@ -474,11 +471,11 @@ export function parseGasOracle(result: GasOracleResponse["result"]): GasOracle {
     };
 }
 export function parseETH2Supply(result: ETH2SupplyResponse["result"]): ETH2Supply {
-    return { 
+    return {
         burntFees: BigInt(result.BurntFees),
         eth2Staking: BigInt(result.Eth2Staking),
         ethSupply: BigInt(result.EthSupply),
-    }
+    };
 }
 export function parseETHPrice(result: ETHPriceResponse["result"]): ETHPrice {
     return {
@@ -486,5 +483,5 @@ export function parseETHPrice(result: ETHPriceResponse["result"]): ETHPrice {
         btcTimestamp: new Date(Number(result.ethbtc_timestamp) * 1000),
         usdPerEth: Number(result.ethusd),
         usdTimestamp: new Date(Number(result.ethusd_timestamp) * 1000),
-    }
+    };
 }
