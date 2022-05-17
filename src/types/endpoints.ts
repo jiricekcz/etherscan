@@ -187,3 +187,8 @@ export interface BlockNumberResponse {
     message: string;
     result: string;
 }
+export interface ERC20VolumeResponse {
+    status: string;
+    message: string;
+    result: string;
+}

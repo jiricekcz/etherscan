@@ -40,6 +40,7 @@ import {
     BlockAndUncleRewardResponse,
     EstimatedBlockCountdownTimeResponse,
     BlockNumberResponse,
+    ERC20VolumeResponse,
 } from "./types/endpoints";
 
 export class Fetcher implements IFetcher {
@@ -259,11 +260,9 @@ export class Fetcher implements IFetcher {
     }
 
     async getBlockAndUncleReward(blockNumber: number): Promise<FetcherBlockAndUncleReward> {
-        const response: BlockAndUncleRewardResponse = (await this.fetchEtherscanMethod(
-            "block",
-            "getblockreward",
-            [{ name: "blockno", value: blockNumber.toString() }]
-        )) as BlockAndUncleRewardResponse;
+        const response: BlockAndUncleRewardResponse = (await this.fetchEtherscanMethod("block", "getblockreward", [
+            { name: "blockno", value: blockNumber.toString() },
+        ])) as BlockAndUncleRewardResponse;
         return parseBlockAndUncleReward(response.result);
     }
 
@@ -275,13 +274,28 @@ export class Fetcher implements IFetcher {
         )) as EstimatedBlockCountdownTimeResponse;
         return parseEstimatedBlockCountdownTime(response.result);
     }
+
     async getBlockNumberByTimestamp(timestamp: Date): Promise<number> {
-        const response: BlockNumberResponse = (await this.fetchEtherscanMethod(
-            "block",
-            "getblocknobytime",
-            [{ name: "timestamp", value: Math.round(timestamp.getTime() / 1000).toString() }]
-        )) as BlockNumberResponse;
+        const response: BlockNumberResponse = (await this.fetchEtherscanMethod("block", "getblocknobytime", [
+            { name: "timestamp", value: Math.round(timestamp.getTime() / 1000).toString() },
+        ])) as BlockNumberResponse;
         return Number(response.result);
+    }
+
+    async getTokenERC20TotalSupply(contractAddress: string): Promise<BigInt> {
+        const response: ERC20VolumeResponse = (await this.fetchEtherscanMethod("stats", "tokensupply", [
+            { name: "contractaddress", value: contractAddress },
+        ])) as ERC20VolumeResponse;
+        return BigInt(response.result);
+    }
+
+    async getTokenERC20AccountBalance(contractAddress: string, address: string, tag: Tag = "latest"): Promise<BigInt> {
+        const response: ERC20VolumeResponse = (await this.fetchEtherscanMethod("account", "tokenbalance", [
+            { name: "contractaddress", value: contractAddress },
+            { name: "address", value: address },
+            { name: "tag", value: tag?.toString() },
+        ])) as ERC20VolumeResponse;
+        return BigInt(response.result);
     }
 }
 export function parseNormalTransaction(result: Transaction): FetcherTransaction {
@@ -378,11 +392,13 @@ export function parseBlockAndUncleReward(result: BlockAndUncleRewardResponse["re
                 ...u,
                 blockReward: BigInt(u.blockreward),
                 unclePosition: Number(u.unclePosition),
-            }
-        })
+            };
+        }),
     };
 }
-export function parseEstimatedBlockCountdownTime(result: EstimatedBlockCountdownTimeResponse["result"]): FetcherEstimatedBlockCountdownTime {
+export function parseEstimatedBlockCountdownTime(
+    result: EstimatedBlockCountdownTimeResponse["result"]
+): FetcherEstimatedBlockCountdownTime {
     return {
         countdownBlock: Number(result.CountdownBlock),
         currentBlock: Number(result.CurrentBlock),
