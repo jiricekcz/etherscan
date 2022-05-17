@@ -207,7 +207,7 @@ export interface IFetcher {
      * @returns Block number that was mined at a certain timestamp
      * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/blocks#get-block-number-by-timestamp)
      */
-    getBlockNumberByTimestamp(timestamp: number): Promise<number>;
+    getBlockNumberByTimestamp(timestamp: Date): Promise<number>;
 
     //TODO: logs
 
@@ -430,7 +430,7 @@ export interface UncleBlockReward {
     unclePosition: number;
     blockReward: BigInt;
 }
-export type Module = "account" | "contract" | "transaction" | "proxy" | "stats" | "gastracker";
+export type Module = "account" | "contract" | "transaction" | "proxy" | "stats" | "gastracker" | "block";
 export type Tag = "earliest" | "latest" | "pending";
 export type SortOption = "asc" | "desc";
 export type BlockType = "blocks" | "uncles";

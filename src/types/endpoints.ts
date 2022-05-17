@@ -153,3 +153,37 @@ export interface ContractSource {
     Implementation: string;
     SwarmSource: string;
 }
+export interface UncleReward {
+    miner: string;
+    unclePosition: string;
+    blockreward: string;
+}
+export interface BlockAndUncleReward {
+    blockNumber: string;
+    timeStamp: string;
+    blockMiner: string;
+    blockReward: string;
+    uncles: UncleReward[];
+    uncleInclusionReward: string;
+}
+export interface BlockAndUncleRewardResponse {
+    status: string;
+    message: string;
+    result: BlockAndUncleReward;
+}
+export interface EstimatedBlockCountdownTime {
+    CurrentBlock: string;
+    CountdownBlock: string;
+    RemainingBlock: string;
+    EstimateTimeInSec: string;
+}
+export interface EstimatedBlockCountdownTimeResponse {
+    status: string;
+    message: string;
+    result: EstimatedBlockCountdownTime;
+}
+export interface BlockNumberResponse {
+    status: string;
+    message: string;
+    result: string;
+}

@@ -17,6 +17,8 @@ import {
     BlockType,
     ContractSource as FetcherContractSource,
     TransactionExecutionStatus as FetcherTransactionExecutionStatus,
+    BlockAndUncleReward as FetcherBlockAndUncleReward,
+    EstimatedBlockCountdownTime as FetcherEstimatedBlockCountdownTime,
 } from "./interfaces/Ifetcher";
 import {
     AccountBalanceResponse,
@@ -35,6 +37,9 @@ import {
     ContractSourceResponse,
     TransactionExecutionStatusResponse,
     TransactionReceiptStatusResponse,
+    BlockAndUncleRewardResponse,
+    EstimatedBlockCountdownTimeResponse,
+    BlockNumberResponse,
 } from "./types/endpoints";
 
 export class Fetcher implements IFetcher {
@@ -247,13 +252,37 @@ export class Fetcher implements IFetcher {
     async getTransactionReceiptStatus(txHash: string): Promise<boolean> {
         const response: TransactionReceiptStatusResponse = (await this.fetchEtherscanMethod(
             "transaction",
-            "gettxreceiptstatus",
+            "getstatus",
             [{ name: "txhash", value: txHash }]
         )) as TransactionReceiptStatusResponse;
         return response.result === "1";
     }
 
-    
+    async getBlockAndUncleReward(blockNumber: number): Promise<FetcherBlockAndUncleReward> {
+        const response: BlockAndUncleRewardResponse = (await this.fetchEtherscanMethod(
+            "block",
+            "getblockreward",
+            [{ name: "blockno", value: blockNumber.toString() }]
+        )) as BlockAndUncleRewardResponse;
+        return parseBlockAndUncleReward(response.result);
+    }
+
+    async getEstimatedBlockCountdownTime(blockNumber: number): Promise<FetcherEstimatedBlockCountdownTime> {
+        const response: EstimatedBlockCountdownTimeResponse = (await this.fetchEtherscanMethod(
+            "block",
+            "getblockcountdown",
+            [{ name: "blockno", value: blockNumber.toString() }]
+        )) as EstimatedBlockCountdownTimeResponse;
+        return parseEstimatedBlockCountdownTime(response.result);
+    }
+    async getBlockNumberByTimestamp(timestamp: Date): Promise<number> {
+        const response: BlockNumberResponse = (await this.fetchEtherscanMethod(
+            "block",
+            "getblocknobytime",
+            [{ name: "timestamp", value: Math.round(timestamp.getTime() / 1000).toString() }]
+        )) as BlockNumberResponse;
+        return Number(response.result);
+    }
 }
 export function parseNormalTransaction(result: Transaction): FetcherTransaction {
     return {
@@ -335,5 +364,30 @@ export function parseTransactionExecutionStatus(
     return {
         errorMessage: result.errDescription,
         isError: result.isError === "1",
+    };
+}
+export function parseBlockAndUncleReward(result: BlockAndUncleRewardResponse["result"]): FetcherBlockAndUncleReward {
+    return {
+        blockReward: BigInt(result.blockReward),
+        blockNumber: Number(result.blockNumber),
+        uncleInlusionReward: BigInt(result.uncleInclusionReward),
+        timeStamp: new Date(Number(result.timeStamp) * 1000),
+        miner: result.blockMiner,
+        uncles: result.uncles.map((u) => {
+            return {
+                ...u,
+                blockReward: BigInt(u.blockreward),
+                unclePosition: Number(u.unclePosition),
+            }
+        })
+    };
+}
+export function parseEstimatedBlockCountdownTime(result: EstimatedBlockCountdownTimeResponse["result"]): FetcherEstimatedBlockCountdownTime {
+    return {
+        countdownBlock: Number(result.CountdownBlock),
+        currentBlock: Number(result.CurrentBlock),
+        estimatedMineTimestamp: new Date(Number(result.EstimateTimeInSec) * 1000),
+        estimatedTimeInMilliseconds: Number(result.EstimateTimeInSec) * 1000,
+        remainingBlocks: Number(result.RemainingBlock),
     };
 }
