@@ -16,6 +16,7 @@ import {
     BlockMineResult,
     BlockType,
     ContractSource as FetcherContractSource,
+    TransactionExecutionStatus as FetcherTransactionExecutionStatus,
 } from "./interfaces/Ifetcher";
 import {
     AccountBalanceResponse,
@@ -32,6 +33,8 @@ import {
     ContractSource,
     ABIResponse,
     ContractSourceResponse,
+    TransactionExecutionStatusResponse,
+    TransactionReceiptStatusResponse,
 } from "./types/endpoints";
 
 export class Fetcher implements IFetcher {
@@ -231,6 +234,26 @@ export class Fetcher implements IFetcher {
         ])) as ContractSourceResponse;
         return parseContractSource(response.result);
     }
+
+    async getTransactionExecutionStatus(txHash: string): Promise<FetcherTransactionExecutionStatus> {
+        const response: TransactionExecutionStatusResponse = (await this.fetchEtherscanMethod(
+            "transaction",
+            "getstatus",
+            [{ name: "txhash", value: txHash }]
+        )) as TransactionExecutionStatusResponse;
+        return parseTransactionExecutionStatus(response.result);
+    }
+
+    async getTransactionReceiptStatus(txHash: string): Promise<boolean> {
+        const response: TransactionReceiptStatusResponse = (await this.fetchEtherscanMethod(
+            "transaction",
+            "gettxreceiptstatus",
+            [{ name: "txhash", value: txHash }]
+        )) as TransactionReceiptStatusResponse;
+        return response.result === "1";
+    }
+
+    
 }
 export function parseNormalTransaction(result: Transaction): FetcherTransaction {
     return {
@@ -304,5 +327,13 @@ export function parseContractSource(result: ContractSource): FetcherContractSour
         proxy: Number(result.Proxy),
         runs: Number(result.Runs),
         swarmSource: result.SwarmSource,
+    };
+}
+export function parseTransactionExecutionStatus(
+    result: TransactionExecutionStatusResponse["result"]
+): FetcherTransactionExecutionStatus {
+    return {
+        errorMessage: result.errDescription,
+        isError: result.isError === "1",
     };
 }

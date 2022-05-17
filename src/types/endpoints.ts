@@ -47,6 +47,19 @@ export interface ContractSourceResponse {
     message: string;
     result: ContractSource;
 }
+export interface TransactionExecutionStatusResponse {
+    status: string;
+    message: string;
+    result: {
+        isError: string;
+        errDescription: string;
+    };
+}
+export interface TransactionReceiptStatusResponse {
+    status: string;
+    message: string;
+    result: string;
+}
 export interface Transaction {
     blockNumber: string;
     timeStamp: string;
