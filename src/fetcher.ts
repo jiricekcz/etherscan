@@ -19,6 +19,8 @@ import {
     TransactionExecutionStatus as FetcherTransactionExecutionStatus,
     BlockAndUncleReward as FetcherBlockAndUncleReward,
     EstimatedBlockCountdownTime as FetcherEstimatedBlockCountdownTime,
+    GasConfirmationTimeEstimation,
+    GasOracle,
 } from "./interfaces/Ifetcher";
 import {
     AccountBalanceResponse,
@@ -41,6 +43,8 @@ import {
     EstimatedBlockCountdownTimeResponse,
     BlockNumberResponse,
     ERC20VolumeResponse,
+    GasConfirmationTimeEstimationResponse,
+    GasOracleResponse,
 } from "./types/endpoints";
 
 export class Fetcher implements IFetcher {
@@ -50,12 +54,12 @@ export class Fetcher implements IFetcher {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async fetchEtherscanMethod(module: Module, action: string, params: Param[]): Promise<any> {
+    async fetchEtherscanMethod(module: Module, action: string, params?: Param[]): Promise<any> {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return await this.fetchEtherscanMethodOnce(module, action, params);
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async fetchEtherscanMethodOnce(module: Module, action: string, params: Param[]): Promise<EtherscanResponse> {
+    async fetchEtherscanMethodOnce(module: Module, action: string, params: Param[] = []): Promise<EtherscanResponse> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const requestParams: any = {
             module,
@@ -297,6 +301,24 @@ export class Fetcher implements IFetcher {
         ])) as ERC20VolumeResponse;
         return BigInt(response.result);
     }
+
+    async getGasConfirmationTimeEstimation(gasprice: BigInt): Promise<GasConfirmationTimeEstimation> {
+        const response: GasConfirmationTimeEstimationResponse = (await this.fetchEtherscanMethod(
+            "gastracker",
+            "gasestimate",
+            [{ name: "gasprice", value: gasprice.toString() }]
+        )) as GasConfirmationTimeEstimationResponse;
+        return parseGasConfirmationTimeEstimation(response.result);
+    }
+
+    async getGasOracle(): Promise<GasOracle> {
+        const response: GasOracleResponse = (await this.fetchEtherscanMethod(
+            "gastracker",
+            "gasoracle"
+        )) as GasOracleResponse;
+        return parseGasOracle(response.result);
+    }
+    
 }
 export function parseNormalTransaction(result: Transaction): FetcherTransaction {
     return {
@@ -405,5 +427,21 @@ export function parseEstimatedBlockCountdownTime(
         estimatedMineTimestamp: new Date(Number(result.EstimateTimeInSec) * 1000),
         estimatedTimeInMilliseconds: Number(result.EstimateTimeInSec) * 1000,
         remainingBlocks: Number(result.RemainingBlock),
+    };
+}
+export function parseGasConfirmationTimeEstimation(result: string): GasConfirmationTimeEstimation {
+    return {
+        estimatedMineTimestamp: new Date(Number(result) * 1000),
+        estimatedTimeInMilliseconds: Number(result) * 1000,
+    };
+}
+export function parseGasOracle(result: GasOracleResponse["result"]): GasOracle {
+    return {
+        fastGasPrice: BigInt(result.FastGasPrice),
+        gasUsedRatio: result.gasUsedRatio,
+        lastBlock: Number(result.LastBlock),
+        proposeGasPrice: BigInt(result.ProposeGasPrice),
+        safeGasPrice: BigInt(result.SafeGasPrice),
+        suggestBaseFee: Number(result.suggestBaseFee),
     };
 }

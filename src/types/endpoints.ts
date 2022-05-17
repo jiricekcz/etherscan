@@ -192,3 +192,21 @@ export interface ERC20VolumeResponse {
     message: string;
     result: string;
 }
+export interface GasConfirmationTimeEstimationResponse {
+    status: string;
+    message: string;
+    result: string;
+}
+export interface GasOracle {
+    LastBlock: string;
+    SafeGasPrice: string;
+    ProposeGasPrice: string;
+    FastGasPrice: string;
+    suggestBaseFee: string;
+    gasUsedRatio: string;
+}
+export interface GasOracleResponse {
+    status: string;
+    message: string;
+    result: GasOracle;
+}

@@ -310,7 +310,7 @@ export interface GasOracle {
     proposeGasPrice: BigInt;
     fastGasPrice: BigInt;
     suggestBaseFee: number;
-    gasUsedRation: string;
+    gasUsedRatio: string;
 }
 export interface ETHPrice {
     usdPerEth: number;
