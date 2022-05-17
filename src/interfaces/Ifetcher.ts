@@ -2,6 +2,8 @@
 /**
  * Fetcher is a class that provides basic JavaScript interface to the API.
  * Fetcher methods map 1 to 1 to API methods.
+ * This (standard) fetcher implements the main methods of the Etherscan API. Other methods are implemented in other fetchers.
+ * Other fetchers are: ProFetcher for [Pro API methods](https://docs.etherscan.io/api-pro/api-pro) and ProxyFetcher for [Geth/Parity proxy methods](https://docs.etherscan.io/api-endpoints/geth-parity-proxy).
  */
 export interface IFetcher {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -166,8 +168,105 @@ export interface IFetcher {
     getContractSource(address: string): Promise<ContractSource>;
 
     //TODO: source code verification (not main focus of this library, so development postponed)
+
+    /**
+     * Returns the status code of a contract execution.
+     * @param txHash Hash of the transaction
+     * @returns Status code of the transaction
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/stats#check-contract-execution-status)
+     */
+    getTransactionExecutionStatus(txHash: string): Promise<TransactionExecutionStatus>;
+
+    /**
+     * Returns the status code of a transaction execution.
+     * @param txHash Hash of the transaction
+     * @return Transaction receipt status
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/stats#check-transaction-receipt-status)
+     */
+    getTransactionReceiptStatus(txHash: string): Promise<boolean>;
+
+    /**
+     * Returns the block reward and 'Uncle' block rewards.
+     * @param blockNumber The block number
+     * @returns Block reward and uncle block rewards
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/blocks#get-block-and-uncle-rewards-by-blockno)
+     */
+    getBlockAndUncleReward(blockNumber: number): Promise<BlockAndUncleReward>;
+
+    /**
+     * Returns the estimated time remaining, in milliseconds, until a certain block is mined.
+     * @param blockNumber The block number
+     * @returns Estimated time remaining until a block is mined
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/blocks#get-estimated-block-countdown-time-by-blockno)
+     */
+    getEstimatedBlockCountdownTime(blockNumber: number): Promise<EstimatedBlockCountdownTime>;
+
+    /**
+     * Returns the block number that was mined at a certain timestamp.
+     * @param timestamp Timestamp of the block
+     * @returns Block number that was mined at a certain timestamp
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/blocks#get-block-number-by-timestamp)
+     */
+    getBlockNumberByTimestamp(timestamp: number): Promise<number>;
+
+    //TODO: logs
+
+    /**
+     * Returns the current amount of an ERC-20 token in circulation.
+     * @param contractAddress Address of the ERC20 contract
+     * @returns Amount of the ERC-20 token in circulation
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/tokens#get-erc20-token-totalsupply-by-contractaddress)
+     */
+    getTokenERC20TotalSupply(contractAddress: string): Promise<BigInt>;
+
+    /**
+     * Returns the current balance of an ERC-20 token of an address.
+     * @param contractAddress Address of the ERC20 contract
+     * @param address Adress of the account
+     * @returns Balance of the ERC-20 token of an address
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/tokens#get-erc20-token-account-balance-for-tokencontractaddress)
+     */
+    getTokenERC20AccountBalance(contractAddress: string, address: string, tag?: Tag): Promise<BigInt>;
+
+    /**
+     * Returns the estimated time, in milliseconds, for a transaction to be confirmed on the blockchain.
+     * @param gasprice The gas price to calculate the estimates for
+     * @returns Estimated time, in milliseconds, for a transaction to be confirmed on the blockchain
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/gas-tracker#get-estimation-of-confirmation-time)
+     */
+    getGasConfirmationTimeEstimation(gasprice: BigInt): Promise<GasConfirmationTimeEstimation>;
+
+    /**
+     * Returns the current Safe, Proposed and Fast gas prices.
+     * @returns Current Safe, Proposed and Fast gas prices
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/gas-tracker#get-gas-oracle)
+     */
+    getGasOracle(): Promise<GasOracle>;
+
+    /**
+     * Returns the current amount of Ether in circulation excluding ETH2 Staking rewards and EIP1559 burnt fees.
+     * @returns Amount of Ether in circulation excluding ETH2 Staking rewards and EIP1559 burnt fees
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/stats-1#get-total-supply-of-ether)
+     */
+    getTotalETHSupply(): Promise<BigInt>;
+
+    /**
+     * Returns the current amount of Ether in circulation, ETH2 Staking rewards and EIP1559 burnt fees statistics.
+     * @returns Amount of Ether in circulation, ETH2 Staking rewards and EIP1559 burnt fees statistics
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/stats-1#get-total-supply-of-ether-2)
+     */
+    getTotalETH2Supply(): Promise<ETH2Supply>;
+
+    /**
+     * Returns the latest price of 1 ETH.
+     * @returns Latest price of 1 ETH
+     * @link [Etherscan Docs](https://docs.etherscan.io/api-endpoints/stats-1#get-ether-last-price)
+     */
+    getETHPrice(): Promise<ETHPrice>;
+    // TODO: Ethereum Nodes Size
 }
 
+// TODO: Docs for properties
 export interface Param {
     name: string;
     value: string | string[] | undefined;
@@ -182,6 +281,47 @@ export interface BlockMineResult {
     blockNumber: number;
     timeStamp: Date;
     blockReward: BigInt;
+}
+export interface TransactionExecutionStatusSuccess {
+    isError: false;
+}
+export interface TransactionExecutionStatusFailure {
+    isError: true;
+    errorMessage: string;
+}
+export type TransactionExecutionStatus = TransactionExecutionStatusSuccess | TransactionExecutionStatusFailure;
+export interface EstimatedBlockCountdownTime {
+    currentBlock: number;
+    countdownBlock: number;
+    remainingBlocks: number;
+    /**
+     * The time in milliseconds until the countdown block is mined
+     */
+    estimatedTimeInMilliseconds: number;
+    estimatedMineTimestamp: Date;
+}
+export interface GasConfirmationTimeEstimation {
+    estimatedTimeInMilliseconds: number;
+    estimatedMineTimestamp: Date;
+}
+export interface GasOracle {
+    lastBlock: number;
+    safeGasPrice: BigInt;
+    proposeGasPrice: BigInt;
+    fastGasPrice: BigInt;
+    suggestBaseFee: number;
+    gasUsedRation: string;
+}
+export interface ETHPrice {
+    usdPerEth: number;
+    btcPerEth: number;
+    usdTimestamp: Date;
+    btcTimestamp: Date;
+}
+export interface ETH2Supply {
+    ethSupply: BigInt;
+    eth2Staking: BigInt;
+    burntFees: BigInt;
 }
 export interface Transaction {
     blockNumber: number;
@@ -276,6 +416,19 @@ export interface ContractSource {
     proxy: number;
     implementation: string;
     swarmSource: string;
+}
+export interface BlockAndUncleReward {
+    blockNumber: number;
+    blockReward: BigInt;
+    miner: string;
+    timeStamp: Date;
+    uncles: Array<UncleBlockReward>;
+    uncleInlusionReward: BigInt;
+}
+export interface UncleBlockReward {
+    miner: string;
+    unclePosition: number;
+    blockReward: BigInt;
 }
 export type Module = "account" | "contract" | "transaction" | "proxy" | "stats" | "gastracker";
 export type Tag = "earliest" | "latest" | "pending";
