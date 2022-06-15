@@ -1,6 +1,11 @@
 /* eslint-disable import/no-unresolved */
 import { API } from "./api";
 import { RequestTimeTracker } from "./utils";
+import { IAPI } from "./interfaces/Iapi";
+import { IFetcher } from "./interfaces/Ifetcher";
+import * as IFetcherInterfaces from "./interfaces/Ifetcher";
+import { IProxyFetcher } from "./interfaces/IproxyFetcher";
+import * as IproxyFetcherInterfaces from "./interfaces/IproxyFetcher";
 async function main(): Promise<void> {
     const api = new API({
         key: [
@@ -36,4 +41,4 @@ async function main(): Promise<void> {
 if (require.main === module) {
     void main();
 }
-export { API };
+export { API, IAPI, IFetcher, IFetcherInterfaces, IProxyFetcher, IproxyFetcherInterfaces };
