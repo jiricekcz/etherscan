@@ -66,7 +66,9 @@ export class HexData {
         return parseInt(hex.substring(2), 16);
     }
     static parseHexToBigIntUnsafe(hex: string): BigInt {
-        if (hex.length % 2) { hex = '0' + hex; }
+        if (hex.length % 2) {
+            hex = "0" + hex;
+        }
         return BigInt(hex);
     }
 }

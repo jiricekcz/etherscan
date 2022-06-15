@@ -3,9 +3,9 @@
 import { HexData } from "../hexData";
 
 /**
- * ProxyFetcher is a specialiezed fetcher for Geth/Parity proxy to use with etherscan.  
- * ProxyFetcher maps 1 to 1 with the API methods provieded by etherscan.  
- * This fetcher implements the Geth/Parity proxy methods. Other methods are implemented in other fetchers.  
+ * ProxyFetcher is a specialiezed fetcher for Geth/Parity proxy to use with etherscan.
+ * ProxyFetcher maps 1 to 1 with the API methods provieded by etherscan.
+ * This fetcher implements the Geth/Parity proxy methods. Other methods are implemented in other fetchers.
  * Other fetchers are: ProFetcher for [Pro API methods](https://docs.etherscan.io/api-pro/api-pro) and Fetcher for standard methods.
  */
 export interface IProxyFetcher {
