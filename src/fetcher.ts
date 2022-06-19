@@ -115,7 +115,7 @@ export class Fetcher implements IFetcher {
     async getAccountNormalTransactions(
         address: string,
         startBlock = 0,
-        endblock = 1e7,
+        endblock = 1e17,
         page?: number | undefined,
         offset?: number | undefined,
         sort: SortOption = "desc"
@@ -134,7 +134,7 @@ export class Fetcher implements IFetcher {
     async getAccountInternalTransactions(
         address: string,
         startBlock = 0,
-        endblock = 1e7,
+        endblock = 1e17,
         page?: number | undefined,
         offset?: number | undefined,
         sort: SortOption = "desc"
@@ -158,7 +158,7 @@ export class Fetcher implements IFetcher {
 
     async getInternalTransactionsFromBlockRange(
         startBlock = 0,
-        endblock = 1e7,
+        endblock = 1e17,
         page?: number | undefined,
         offset?: number | undefined,
         sort: SortOption = "desc"
@@ -177,7 +177,7 @@ export class Fetcher implements IFetcher {
         contractAddress: string,
         address: string,
         startBlock = 0,
-        endblock = 1e7,
+        endblock = 1e17,
         page?: number | undefined,
         offset?: number | undefined,
         sort: SortOption = "desc"
